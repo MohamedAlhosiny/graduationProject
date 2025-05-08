@@ -22,7 +22,9 @@ class VideoController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'desc' => 'nullable|string',
-            'video' => 'required|mimes:mp4,avi,mkv,wmv',
+            // 'video' => 'required|mimes:mp4,avi,mkv,wmv',
+            'video' => 'mimetypes:video/avi,video/mpeg,video/quicktime'
+
         ]);
         // dd($request);
 
@@ -135,7 +137,9 @@ class VideoController extends Controller
             $request->validate([
                         'name' => 'required|string|max:255',
                         'desc' => 'required|string',
-                        'video' => 'nullable|mimes:mp4,avi,mkv|max:20480',
+                        // 'video' => 'nullable|mimes:mp4,avi,mkv|max:20480',
+                        'video' => 'nullable|mimetypes:video/avi,video/mpeg,video/quicktime'
+
                     ]);
                     $video->desc = $request->desc;
                     $video->name = $request->name;

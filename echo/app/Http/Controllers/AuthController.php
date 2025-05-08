@@ -7,7 +7,7 @@ use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
-class AuthContoller extends Controller
+class AuthController extends Controller
 {
     //Authentication
     public function register (Request $request ) {
@@ -60,7 +60,7 @@ class AuthContoller extends Controller
             $token = $user->createToken('mytoken')->plainTextToken;
 
             $response = [
-                'message' => 'welcome to our APP',
+                'message' => 'welcome  to our APP',
                 'token' => $token,
                 'data' => [
                     $user->name,
