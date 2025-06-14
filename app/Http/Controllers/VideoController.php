@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\video;
+use Illuminate\Foundation\Auth\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -23,7 +24,8 @@ class VideoController extends Controller
             'name' => 'required|string|max:255',
             'desc' => 'nullable|string',
             // 'video' => 'required|mimes:mp4,avi,mkv,wmv',
-            'video' => 'mimetypes:video/avi,video/mpeg,video/quicktime'
+            // 'video' => 'mimetypes:mp4,video/avi,video/mpeg,video/quicktime'
+            'video' => 'required|file|mimes:mp4,avi,mov,wmv,flv,mkv,webm,mpeg,3gp'
 
         ]);
         // dd($request);
@@ -42,6 +44,7 @@ class VideoController extends Controller
             'name' => $request->name,
             'desc' => $request->desc,
             'video' => $videoPath,
+            'user_id' => auth()->id()
         ]);
 
         // Process video (e.g., convert to sign language)
@@ -81,6 +84,7 @@ class VideoController extends Controller
 
     public function show(string $id)
     {
+
 
         $video = video::find($id);
 

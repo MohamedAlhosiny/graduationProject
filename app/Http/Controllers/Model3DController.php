@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Model3D;
+use Dotenv\Util\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -13,7 +14,14 @@ class Model3DController extends Controller
      */
     public function index()
     {
-        //
+        $model = Model3D::all();
+        $response = [
+            'message' => 'data retrieved success',
+            'data' => $model,
+            'status' => 200
+        ];
+
+        return response()->json($response ,200);
     }
 
     /**
@@ -69,9 +77,28 @@ class Model3DController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Model3D $model3D)
+    public function show(Model3D $model3D , string $id)
     {
-        //
+
+        $model = Model3D::find($id);
+        // dd($model);
+        if(!empty($model)) {
+            $response = [
+                'message' => 'data retrieved success' ,
+                'data' => $model ,
+                'status' => 200,
+                'success' => true
+            ];
+        } else {
+            $response = [
+                'message' => 'data not found' ,
+                'status' => 401 ,
+                'success' => false
+            ];
+        }
+
+        return response()->json($response , 200);
+
     }
 
     /**
@@ -87,7 +114,7 @@ class Model3DController extends Controller
      */
     public function update(Request $request, Model3D $model3D)
     {
-        //
+
     }
 
     /**

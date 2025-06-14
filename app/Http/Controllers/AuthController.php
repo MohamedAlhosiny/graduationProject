@@ -46,7 +46,9 @@ class AuthController extends Controller
             'phone' => 'string|required'
         ]);
 
-        $user = User::where('email' , $request->email)->orWhere('phone' , $request->phone)->first();
+        // $user = User::where('email' , $request->email)->orWhere('phone' , $request->phone)->first();
+        $user = User::where('email', $request->email)->where('phone', $request->phone)->first();
+
 
         if(!$user || !Hash::check($request->password , $user->password )) {
 
@@ -83,7 +85,7 @@ class AuthController extends Controller
         $user->currentAccessToken()->delete();
 
         $response = [
-            'message' => 'user logged out success',
+            'message' => 'user log out success',
             'status' => 200
         ];
 
