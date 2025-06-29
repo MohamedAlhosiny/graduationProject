@@ -47,12 +47,15 @@ class VideoController extends Controller
             'user_id' => auth()->id()
         ]);
 
+
+
         // Process video (e.g., convert to sign language)
         //  $this->processVideo($video);
 
         return response()->json([
             'status' => 'success',
-            'data' => $video
+            'description' => $video->desc,
+            'video' => url('storage/' .  $video->video) // to flutter can see it
         ], 200);
     }
 
@@ -60,21 +63,27 @@ class VideoController extends Controller
 
     public function index()
     {
-        $videos = Video::all();
-        // dd($videos);
+        $videos = Video::all()->map(function ($video) {
+            return [
+                'id' => $video->id,
+                'name' => $video->name,
+                'desc' => $video->desc,
+                'video' => url('storage/' . $video->video),
+                'created_at' => $video->created_at,
+                'updated_at' => $video->updated_at,
+                'user_id' => $video->user_id,
+            ];
+        });
 
         $response = [
             'message' => 'all data retrieved success',
             'data' => $videos,
             'status' => 200
         ];
-        return response($response, 200);
-        //  return response()->json([
-        //      'status' => 'success',
-        //      'data' => $videos
-        //  ], 200);
 
+        return response($response, 200);
     }
+
 
 
 
@@ -87,11 +96,13 @@ class VideoController extends Controller
 
 
         $video = video::find($id);
+        // dd(asset('storage/' . $video->video));
 
         if (!empty($video)) {
             $response = [
                 'message' => 'data retrieved success',
-                'data' => $video,
+                'description' => $video->desc,
+                'video' => url('storage/' . $video->video),
                 'status' => 200
             ];
         } else {
@@ -102,11 +113,6 @@ class VideoController extends Controller
         }
 
         return response($response, 200);
-
-        // return response()->json([
-        //     'status' => 'success',
-        //     'data' => $video
-        // ], 200);
     }
 
 
@@ -137,40 +143,48 @@ class VideoController extends Controller
         // }
 
 
-        if(!empty($video)) {
+        if (!empty($video)) {
             $request->validate([
-                        'name' => 'required|string|max:255',
-                        'desc' => 'required|string',
-                        // 'video' => 'nullable|mimes:mp4,avi,mkv|max:20480',
-                        'video' => 'nullable|mimetypes:video/avi,video/mpeg,video/quicktime'
+                'name' => 'required|string|max:255',
+                'desc' => 'required|string',
+                // 'video' => 'nullable|mimes:mp4,avi,mkv|max:20480',
+                'video' => 'nullable|mimes:mp4,video/avi,video/mpeg,video/quicktime'
 
-                    ]);
-                    $video->desc = $request->desc;
-                    $video->name = $request->name;
-                    $video->update();
+            ]);
+            $video->desc = $request->desc;
+            $video->name = $request->name;
+            // $video->update();
 
-                    $file = $request->file('video');
+            $file = $request->file('video');
 
-                    if($file) {
-                        $videoPath = $request->file('video')->store('videos', 'public');
-                        $video->video = $videoPath;
-                        Storage::disk('public')->delete($video->video);
-                    }
-                    $video->save();
+            if ($file && $file->isValid()) {
 
-                    $response = [
-                        'message' => 'data updated success',
-                        'data' => $video,
-                        'status' => 200
-                    ];
-        }else {
-            $response =[
-                'message'=> 'not updated',
+                $oldVideoPath = $video->video;
+
+
+                $videoPath = $file->store('videos', 'public');
+                $video->video = $videoPath;
+
+                if ($oldVideoPath && Storage::disk('public')->exists($oldVideoPath)) {
+                    Storage::disk('public')->delete($oldVideoPath);
+                }
+            }
+
+            $video->save();
+
+            $response = [
+                'message' => 'data updated success',
+                'data' => url('storage/' . $video->video),
+                'status' => 200
+            ];
+        } else {
+            $response = [
+                'message' => 'not updated',
                 'status' => 200
             ];
         }
 
-        return response($response , 200);
+        return response($response, 200);
 
 
 
@@ -197,9 +211,7 @@ class VideoController extends Controller
     {
         $video = video::find($id);
         if (!empty($video)) {
-            // تحقق مما إذا كانت القيمة في 'video_path' غير فارغة أو null
             if (!empty($video->video) && Storage::disk('public')->exists($video->video)) {
-                // إذا كان المسار موجودًا، نقوم بحذفه
                 Storage::disk('public')->delete($video->video);
             }
 
@@ -217,7 +229,6 @@ class VideoController extends Controller
         }
 
         return response($response, 200);
-
     }
 
 
