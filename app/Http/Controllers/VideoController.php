@@ -6,6 +6,8 @@ use App\Models\video;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+// use Illuminate\Support\Facades\Http;
+
 use Illuminate\Support\Facades\Storage;
 use Psy\Util\Str;
 
@@ -74,6 +76,9 @@ class VideoController extends Controller
                 'user_id' => $video->user_id,
             ];
         });
+
+        //map function بتخليك تعدل في شكل الاوبجكت اللي راجعلك
+
 
         $response = [
             'message' => 'all data retrieved success',
@@ -153,7 +158,7 @@ class VideoController extends Controller
             ]);
             $video->desc = $request->desc;
             $video->name = $request->name;
-            // $video->update();
+            $video->update();
 
             $file = $request->file('video');
 
@@ -246,5 +251,19 @@ class VideoController extends Controller
         $video->update([
             'processed' => true,
         ]);
+    }
+
+
+    public function sendToFastAPI(Request $request)
+    {
+        $video = $request->file('video');
+
+        $response = Http::attach(
+            'video',
+            file_get_contents($video->getRealPath()),
+            $video->getClientOriginalName()
+        )->post('http://127.0.0.1:9000/process-video/');
+
+        return response()->json($response->json());
     }
 }

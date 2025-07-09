@@ -10,4 +10,10 @@ class Model3D extends Model
     use HasFactory;
     protected $table = 'models';
     protected $fillable = ['name' , 'path'];
+
+    
+
+    public function word(){
+     return $this->belongsTo(Word::class);
+    }
 }

@@ -23,6 +23,8 @@ class User extends Authenticatable
         'email',
         'password',
         'phone',
+        'otp_code',
+        'otp_expires_at',
     ];
 
     /**
@@ -44,7 +46,8 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function videos(){
-        return $this->hasMany(video::class , 'user_id');
+    public function videos()
+    {
+        return $this->hasMany(video::class, 'user_id');
     }
 }

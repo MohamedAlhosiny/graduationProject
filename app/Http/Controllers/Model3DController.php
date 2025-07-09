@@ -14,14 +14,19 @@ class Model3DController extends Controller
      */
     public function index()
     {
-        $model = Model3D::all();
-        $response = [
-            'message' => 'data retrieved success',
-            'data' => $model,
-            'status' => 200
-        ];
+        $models = Model3D::all()->map(function ($model) {
+            return [
+                'id' => $model->id,
+                'name' => $model->name,
+                'url' => url($model->path),
+            ];
+        });
 
-        return response()->json($response ,200);
+        return response()->json([
+            'message' => 'Data retrieved successfully',
+            'status' => 200,
+            'data' => $models
+        ], 200);
     }
 
     /**
@@ -58,7 +63,7 @@ class Model3DController extends Controller
                 'status' => 200,
                 'success' => true,
                 'data' => [
-                    'url' => asset($model->path)
+                    'url' => url($model->path)
                 ]
             ];
 
@@ -77,28 +82,33 @@ class Model3DController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Model3D $model3D , string $id)
+    public function show(Model3D $model3D, string $id)
     {
 
         $model = Model3D::find($id);
         // dd($model);
-        if(!empty($model)) {
+        if (!empty($model)) {
             $response = [
-                'message' => 'data retrieved success' ,
-                'data' => $model ,
+                'message' => 'data retrieved success',
+                'data' => [
+                    $model->id,
+                    $model->name,
+                    url('storage/' . $model->path),
+                    $model->created_at,
+                    $model->updated_at
+                ],
                 'status' => 200,
                 'success' => true
             ];
         } else {
             $response = [
-                'message' => 'data not found' ,
-                'status' => 401 ,
+                'message' => 'data not found',
+                'status' => 401,
                 'success' => false
             ];
         }
 
-        return response()->json($response , 200);
-
+        return response()->json($response, 200);
     }
 
     /**
@@ -109,19 +119,83 @@ class Model3DController extends Controller
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Model3D $model3D)
+
+    public function update(Request $request, string $id)
     {
 
+
+        $model = Model3D::find($id);
+
+        if (!empty($model)) {
+            $request->validate([
+                'name' => 'nullable|string',
+                'path' => 'nullable|file|mimes:glb,bin,gltf'
+            ]);
+            $model->name = $request->name;
+
+            $model->update();
+
+            $newFile = $request->file('path');
+            if ($newFile && $newFile->isValid()) {
+                if ($model->path) {
+                    $oldFilePath = str_replace('storage/', '', $model->path);
+                    Storage::disk('public')->delete($oldFilePath);
+                }
+
+                $fileName = time() . '-' . $newFile->getClientOriginalName();
+                $filePath = $newFile->storeAs('models', $fileName, 'public');
+
+                $model->path = $filePath;
+            }
+            $model->save();
+            $response = [
+                'message' => 'model updated success',
+                'data' => [
+                    $model->id,
+                    $model->name,
+                    url('storage/' . $model->path)
+                ],
+
+                'status' => 200
+            ];
+
+            return response()->json($response, 200);
+        } else {
+            $response = [
+                'message' => 'model not found to update',
+                'status' => 404
+            ];
+
+            return response()->json($response, 400);
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Model3D $model3D)
+
+    public function destroy(string $id)
     {
-        //
+        $deleteModel = Model3D::find($id);
+
+        if (!empty($deleteModel)) {
+            if (!empty($deleteModel->path)) {
+                $filePath = str_replace('storage/', '', $deleteModel->path);
+                if (Storage::disk('public')->exists($filePath)) {
+                    Storage::disk('public')->delete($filePath);
+                }
+            }
+
+            $deleteModel->delete();
+
+            $response = [
+                'message' => 'Model deleted successfully',
+                'status' => 204
+            ];
+            return response()->json($response, 200);
+        } else {
+            $response = [
+                'message' => 'Model not found',
+                'status' => 404
+            ];
+            return response()->json($response, 200);
+        }
     }
 }

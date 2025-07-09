@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use App\Models\Word;
 class video extends Model
 {
     protected $fillable = [
@@ -19,5 +19,9 @@ class video extends Model
     }
 
 
+public function word()
+{
+    return $this->belongsToMany(Word::class);
+}
 
 }
