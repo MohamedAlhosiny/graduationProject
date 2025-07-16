@@ -40,6 +40,12 @@ class WordController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'text' => 'string|required|max:100'
+        ]);
+        
+
+
 
     }
 

@@ -27,9 +27,7 @@ class VideoController extends Controller
             'desc' => 'nullable|string',
             // 'video' => 'required|mimes:mp4,avi,mkv,wmv',
             // 'video' => 'mimetypes:mp4,video/avi,video/mpeg,video/quicktime'
-            'video' => 'required|file|mimes:mp4,avi,mov,wmv,flv,mkv,webm,mpeg,3gp'
-
-        ]);
+            'video' => 'required|file|mimes:mp4,avi,mov,wmv,flv,mkv,webm,mpeg,3gp']);
         // dd($request);
 
         if ($request->hasFile('video') && $request->file('video')->isValid()) {
@@ -263,7 +261,6 @@ class VideoController extends Controller
             file_get_contents($video->getRealPath()),
             $video->getClientOriginalName()
         )->post('http://127.0.0.1:9000/process-video/');
-
         return response()->json($response->json());
     }
 }
